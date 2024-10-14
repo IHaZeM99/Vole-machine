@@ -41,7 +41,7 @@ string TakeAndCheckSentence(){
 
     // Continue reading characters until one of the conditions is met
     while (char_count < 100) {
-        cin.get(ch); // Get input character by characte
+        cin.get(ch); // Get input character by character
         if (ch == '\n') {
             sentence += ' '; // Add a space instead of a line break
             char_count++;
