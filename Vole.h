@@ -1,17 +1,25 @@
+//
+// Created by adamm on 10/25/2024.
+//
+
 #ifndef A1_T4_VOLE_H
 #define A1_T4_VOLE_H
 
 #include <bits/stdc++.h>
 using namespace std;
 
+
 class Register{
 
 private:
-    map<string ,string> register1[16];
+    map<string ,string> register1;
+    string getHexadecimalRange(int num);
 public:
 
-    string getCell(string address);
-    void setCell(string address, string value);
+    Register();
+    string getCell(const string &address);
+    void setCell(const string &address,const  string &value);
+    void printRegister();
 };
 
 
@@ -20,12 +28,18 @@ public:
 class Memory{
 
 private:
-    map<string ,string> memory[256];
+    map<string ,string> memory;
 public:
 
-    string getCell(string address);
-    void setCell(string address, string value);
+    static string intToHex(int num) ;
+    Memory();
+    string getCell(const string &address);
+    void setCell(const string &address,const string &value);
+    void takeValuesFromFileAndAssignIt(vector<string>& instructions);
+    void printMemory();
+
 };
+
 
 
 class ALU{
@@ -41,30 +55,36 @@ public:
 
 class CU {
 public :
-    void load1(int idxReg, int intMem, Register &register1, Memory &memory);
-    void load2(int idxReg, int val, Register &register1);
+    void load1(const string &register_position,const string &address,Register &register1, Memory &memory);
+    void load2(const string &register_position,const string& value,Register &register1);
     void store(int idxReg, int intMem, Register &register1, Memory &memory);
     void move(int idxReg_1, int idxReg_2, Register &register1);
-    void load1(int idxReg, int intMem, Register &register1, int& Pc);
+    void jump(int idxReg, int intMem, Register &register1, int& Pc);
     void halt();
 };
+
 class CPU{
 
 private:
 
     int program_cnt;
     string instruction_register;
-    Register register1;
-    ALU alu;
-    CU cu;
+    Register* register1;
+    ALU* alu;
+    CU* cu;
+    friend string Memory::intToHex(int num);
+    string fetch(Memory& memory);
+    vector<string> decode(string& instruction);
+    void execute(Register& new_register, Memory& memory, vector<string>& decoded);
 
-    void fetch(Memory& memory);
-    vector<int> decode();
-    void execute(Register &new_register, Memory& memory, vector<int> vec);
 
 public:
 
-    void runNextSteo(Memory& memory);
+    CPU();
+    ~CPU();
+    void runNextStep(Memory& memory);
+    void printRegister();
+
 };
 
 
@@ -78,13 +98,18 @@ class Machine{
 
 private:
 
-    CPU cpu;
-    Memory memory;
+    CPU* cpu{};
+    Memory* memory{};
+    vector<string> instructions;
 
 public:
 
-    void loadProgramFile();
-
+    Machine();
+    ~Machine();
+    bool verifyInputs();
+    void loadProgramFile(const string& file_path);
+    void sendInstructionsToMemory();
+    void sendInstructionsToCPU();
     void outPutState();
 };
 
