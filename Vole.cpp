@@ -1,11 +1,7 @@
 //
-// Created by adamm on 10/25/2024.
+// Created by Hazem Ahmed on 10/25/2024.
 //
-
 #include "Vole.h"
-#include <bits/stdc++.h>
-
-
 Machine::Machine() {
 
     cpu = new CPU();
@@ -220,4 +216,31 @@ void CPU::runNextStep(Memory &memory) {
 void CPU::printRegister(){
 
     register1->printRegister();
+}
+
+void CPU::setpc(const std::string &address) {
+    //program_cnt = address;                                  
+}
+
+void CU::store(string idxReg, string strMem, Register &register1, Memory &memory) {
+    string reg_data = register1.getCell(idxReg);
+    memory.setCell(strMem,reg_data);
+    if (strMem == "00"){                                                            // if store on that form R00"print to screen"
+        cout << reg_data << endl;
+    }
+}
+
+void CU::move(string idxReg_1, string idxReg_2, Register &register1) {
+    string reg_data = register1.getCell(idxReg_1);
+    register1.setCell(idxReg_2,reg_data);
+}
+
+void CPU::jump(string idxReg, string RX, Register &register1, CPU &pc) {
+    if (register1.getCell(idxReg) == register1.getCell("0")){
+        pc.setpc(RX);                                                             //Didn't test it yet
+    }
+}
+
+void CU::halt() {
+                                                                                            //i will do it with GUI
 }
