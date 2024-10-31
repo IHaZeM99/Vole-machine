@@ -1,13 +1,8 @@
-//
-// Created by adamm on 10/25/2024.
-//
-
 #ifndef A1_T4_VOLE_H
 #define A1_T4_VOLE_H
 
 #include <bits/stdc++.h>
 using namespace std;
-
 
 class Register{
 
@@ -53,13 +48,13 @@ public:
 
 };
 
-class CU {
+class CU{
 public :
     void load1(const string &register_position,const string &address,Register &register1, Memory &memory);
     void load2(const string &register_position,const string& value,Register &register1);
-    void store(int idxReg, int intMem, Register &register1, Memory &memory);
-    void move(int idxReg_1, int idxReg_2, Register &register1);
-    void jump(int idxReg, int intMem, Register &register1, int& Pc);
+    void store(string idxReg, string strMem, Register &register1, Memory &memory);
+    void move(string idxReg_1, string idxReg_2, Register &register1);
+    //void jump(string idxReg, string RX, Register &register1, CPU &cpu1);
     void halt();
 };
 
@@ -83,16 +78,11 @@ public:
     CPU();
     ~CPU();
     void runNextStep(Memory& memory);
+    void jump(string idxReg, string RX, Register &register1, CPU &cpu1);
+    void setpc(const string &address);
     void printRegister();
 
 };
-
-
-
-
-
-
-
 
 class Machine{
 
