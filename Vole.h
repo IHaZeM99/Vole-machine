@@ -54,7 +54,8 @@ public :
     void load2(const string &register_position,const string& value,Register &register1);
     void store(string idxReg, string strMem, Register &register1, Memory &memory);
     void move(string idxReg_1, string idxReg_2, Register &register1);
-    void jump(string idxReg, string RX, Register &register1, int &pc);
+    void jump1(string idxReg, string RX, Register &register1, int &pc);
+    void jump2(string idxReg, string RX, Register &register1, int &pc);   //bonus
     void halt();
 };
 
@@ -78,7 +79,7 @@ public:
     CPU();
     ~CPU();
     void runNextStep(Memory& memory);
-    void jump(string idxReg, string RX, Register &register1, CPU &cpu1);
+    //void jump(string idxReg, string RX, Register &register1, CPU &cpu1);
     void setpc(const string &address);
     void printRegister();
 
