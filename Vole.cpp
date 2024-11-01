@@ -1,6 +1,4 @@
 
-
-
 #include "Vole.h"
 Machine::Machine() {
 
@@ -234,6 +232,7 @@ int hexStringToInt(const std::string& hexStr) {
 
 
 
+
 void CU::store(string idxReg, string strMem, Register &register1, Memory &memory) {
     string reg_data = register1.getCell(idxReg);
     memory.setCell(strMem,reg_data);
@@ -247,6 +246,7 @@ void CU::move(string idxReg_1, string idxReg_2, Register &register1) {
     register1.setCell(idxReg_2,reg_data);
 }
 
+
 void CU::jump(string idxReg, string RX, Register &register1, int &pc) {
     if (register1.getCell(idxReg) == register1.getCell("0")){
         int new_address = hexStringToInt(RX) - pc;
@@ -254,6 +254,9 @@ void CU::jump(string idxReg, string RX, Register &register1, int &pc) {
     }
 }
 
+
 void CU::halt() {
     //i will do it with GUI
+}
+                                                                                            //i will do it with GUI
 }

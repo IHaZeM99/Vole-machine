@@ -78,6 +78,8 @@ public:
     CPU();
     ~CPU();
     void runNextStep(Memory& memory);
+    void jump(string idxReg, string RX, Register &register1, CPU &cpu1);
+    void setpc(const string &address);
     void printRegister();
 
 };
