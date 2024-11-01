@@ -195,8 +195,8 @@ void CPU::execute(Register &new_register, Memory &memory, vector<string> &decode
     else if (opcode == "2") { // Opcode 2: Load with immediate value
         cu->load2(reg_pos, operand, new_register);
     }
-    else if (opcode == "B") { // Opcode 2: Load with immediate value
-        cu->jump(reg_pos, operand, new_register,program_cnt);
+    else if (opcode == "B") { // Opcode B: Jump to immediate value
+        cu->jump1(reg_pos, operand, new_register,program_cnt);
     }
     else {
         // Add cases for other opcodes (e.g., store, move, jump, halt)
@@ -247,10 +247,17 @@ void CU::move(string idxReg_1, string idxReg_2, Register &register1) {
 }
 
 
-void CU::jump(string idxReg, string RX, Register &register1, int &pc) {
+void CU::jump1(string idxReg, string RX, Register &register1, int &pc) {
     if (register1.getCell(idxReg) == register1.getCell("0")){
         int new_address = hexStringToInt(RX) - pc;
-        pc += new_address;                                                            
+        pc += new_address;
+    }
+}
+
+void CU::jump2(std::string idxReg, std::string RX, Register &register1, int &pc) {
+    if (register1.getCell(idxReg) > register1.getCell("0")){
+        int new_address = hexStringToInt(RX) - pc;
+        pc += new_address;
     }
 }
 
@@ -258,4 +265,3 @@ void CU::jump(string idxReg, string RX, Register &register1, int &pc) {
 void CU::halt() {
     //i will do it with GUI
 }
-
