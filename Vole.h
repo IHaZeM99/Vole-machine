@@ -54,7 +54,7 @@ public :
     void load2(const string &register_position,const string& value,Register &register1);
     void store(string idxReg, string strMem, Register &register1, Memory &memory);
     void move(string idxReg_1, string idxReg_2, Register &register1);
-    //void jump(string idxReg, string RX, Register &register1, CPU &cpu1);
+    void jump(string idxReg, string RX, Register &register1, int &pc);
     void halt();
 };
 
@@ -71,7 +71,7 @@ private:
     string fetch(Memory& memory);
     vector<string> decode(string& instruction);
     void execute(Register& new_register, Memory& memory, vector<string>& decoded);
-
+    int hexStringToInt(const std::string& hexStr);
 
 public:
 

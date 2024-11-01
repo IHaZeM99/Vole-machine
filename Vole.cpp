@@ -1,6 +1,4 @@
-//
-// Created by Hazem Ahmed on 10/25/2024.
-//
+
 #include "Vole.h"
 Machine::Machine() {
 
@@ -193,9 +191,14 @@ void CPU::execute(Register &new_register, Memory &memory, vector<string> &decode
 
     if (opcode == "1") {        // Opcode 1: Load from memory
         cu->load1(reg_pos, operand, new_register, memory);
-    } else if (opcode == "2") { // Opcode 2: Load with immediate value
+    }
+    else if (opcode == "2") { // Opcode 2: Load with immediate value
         cu->load2(reg_pos, operand, new_register);
-    } else {
+    }
+    else if (opcode == "B") { // Opcode 2: Load with immediate value
+        cu->jump(reg_pos, operand, new_register,program_cnt);
+    }
+    else {
         // Add cases for other opcodes (e.g., store, move, jump, halt)
     }
 }
@@ -218,9 +221,17 @@ void CPU::printRegister(){
     register1->printRegister();
 }
 
-void CPU::setpc(const std::string &address) {
-    //program_cnt = address;                                  
+
+int hexStringToInt(const std::string& hexStr) {
+    int intValue;
+    std::stringstream ss;
+    ss << std::hex << hexStr;
+    ss >> intValue;
+    return intValue;
 }
+
+
+
 
 void CU::store(string idxReg, string strMem, Register &register1, Memory &memory) {
     string reg_data = register1.getCell(idxReg);
@@ -235,12 +246,17 @@ void CU::move(string idxReg_1, string idxReg_2, Register &register1) {
     register1.setCell(idxReg_2,reg_data);
 }
 
-void CPU::jump(string idxReg, string RX, Register &register1, CPU &pc) {
+
+void CU::jump(string idxReg, string RX, Register &register1, int &pc) {
     if (register1.getCell(idxReg) == register1.getCell("0")){
-        pc.setpc(RX);                                                             //Didn't test it yet
+        int new_address = hexStringToInt(RX) - pc;
+        pc += new_address;                                                             //Didn't test it yet
     }
 }
 
+
 void CU::halt() {
+    //i will do it with GUI
+}
                                                                                             //i will do it with GUI
 }
