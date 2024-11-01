@@ -250,7 +250,7 @@ void CU::move(string idxReg_1, string idxReg_2, Register &register1) {
 void CU::jump(string idxReg, string RX, Register &register1, int &pc) {
     if (register1.getCell(idxReg) == register1.getCell("0")){
         int new_address = hexStringToInt(RX) - pc;
-        pc += new_address;                                                             //Didn't test it yet
+        pc += new_address;                                                            
     }
 }
 
@@ -258,5 +258,4 @@ void CU::jump(string idxReg, string RX, Register &register1, int &pc) {
 void CU::halt() {
     //i will do it with GUI
 }
-                                                                                            //i will do it with GUI
-}
+
