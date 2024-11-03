@@ -31,6 +31,7 @@ public:
     string getCell(const string &address);
     void setCell(const string &address,const string &value);
     void takeValuesFromFileAndAssignIt(vector<string>& instructions);
+    void takeValuesOneByOneAndAssignIt(string &instruction);
     void printMemory();
 
 };
@@ -57,6 +58,8 @@ private:
     };
     string floattohex(double floating);
     double floatextract(string hexa);
+    string hexAnd(const string &hex1, const string &hex2);
+
 public:
 
     string hexToDecimal(string hexa_num);
@@ -64,14 +67,24 @@ public:
     bool isValid(string statment);
     void add(string idx1, string idx2, Register &register1, string address);
     void addF(string idx1, string idx2, Register &register1, string address);
+    void andOperator(const string &register_position1, const string &register_position2, const string &register_store_position, Register &register1);
+
 };
 
 class CU{
+private:
+
+    int rightCyclicRotate(int value, int steps, int register_size);
+    friend string Memory::intToHex(int num);
+
 public :
     void load1(const string &register_position,const string &address,Register &register1, Memory &memory);
     void load2(const string &register_position,const string& value,Register &register1);
     void store(string idxReg, string strMem, Register &register1, Memory &memory);
     void move(string idxReg_1, string idxReg_2, Register &register1);
+    void jump(string idxReg, string RX, Register &register1, int &pc);
+    void jump2(string idxReg, string RX, Register &register1, int &pc);
+    void rotate(const string &register_position,const string& num_of_steps, Register &register1);
     void jump1(string idxReg, string RX, Register &register1, int &pc);
     void jump2(string idxReg, string RX, Register &register1, int &pc);   //bonus
     void halt();
@@ -97,8 +110,8 @@ public:
     CPU();
     ~CPU();
     void runNextStep(Memory& memory);
-    //void jump(string idxReg, string RX, Register &register1, CPU &cpu1);
     void setpc(const string &address);
+    string getPC();
     void printRegister();
 
 };
@@ -117,6 +130,8 @@ public:
     ~Machine();
     bool verifyInputs();
     void loadProgramFile(const string& file_path);
+    void loadProgramNormalWay(const string& instruction);
+    void setPC(const string &address);
     void sendInstructionsToMemory();
     void sendInstructionsToCPU();
     void outPutState();
