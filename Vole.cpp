@@ -72,6 +72,14 @@ void Machine::setPC(const std::string &address) {
         memory->setStart(address);
 }
 
+CPU* Machine::getcpu() {
+    return cpu;
+}
+
+Memory* Machine::getmem() {
+    return memory;
+}
+
 //##################################################//
 //################### Memory #######################//
 //##################################################//
@@ -563,6 +571,16 @@ void CPU::setPC(const string &address) {
 
 string CPU::getPC() {
     return Memory::intToHex(program_cnt);
+}
+
+Register* CPU::getreg(){
+    return register1;
+}
+CU* CPU::getcu(){
+    return cu;
+}
+ALU* CPU::getAlu(){
+    return alu;
 }
 
 void CPU::printRegister(){
