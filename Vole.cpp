@@ -587,6 +587,37 @@ void CPU::printRegister(){
 
     register1->printRegister();
 }
+string ALU::OR(string hexa1, string hexa2){
+    string bin1 = X4B[hexa1[0]] + X4B[hexa1[1]];
+    string bin2 = X4B[hexa2[0]] + X4B[hexa2[1]];
+    string final_bin;
+    for (int i = 0; i < 8; ++i) {
+        if (bin1[i] == '0'){
+            if (bin2[i] == '0') final_bin += "0";
+            else final_bin += "1";
+        }else{
+            final_bin += "1";
+        }
+    }
+    string fin_hex = FourBX[final_bin.substr(0, 4)] + FourBX[final_bin.substr(3, 4)];
+    return fin_hex;
 
+}
+string ALU::XOR(string hexa1, string hexa2){
+    string bin1 = X4B[hexa1[0]] + X4B[hexa1[1]];
+    string bin2 = X4B[hexa2[0]] + X4B[hexa2[1]];
+    string final_bin;
+    for (int i = 0; i < 8; ++i) {
+        if (bin1[i] == '0'){
+            if (bin2[i] == '0') final_bin += "0";
+            else final_bin += "1";
+        }else{
+            if (bin2[i] == '0') final_bin += "1";
+            else final_bin += "0";
+        }
+    }
+    string fin_hex = FourBX[final_bin.substr(0, 4)] + FourBX[final_bin.substr(3, 4)];
+    return fin_hex;
+}
 
 
