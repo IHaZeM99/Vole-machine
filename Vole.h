@@ -116,6 +116,9 @@ public:
     void setPC(const string &address);
     string getPC();
     void printRegister();
+    Register* getreg();
+    CU* getcu();
+    ALU* getAlu();
 
 };
 
@@ -140,6 +143,8 @@ public:
     void outPutState();
     void runTillHalt(Memory &memory);
     void runProgram();
+    CPU* getcpu();
+    Memory* getmem();
 };
 
 
