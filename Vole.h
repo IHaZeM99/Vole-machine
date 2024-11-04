@@ -44,7 +44,6 @@ public:
 
 class ALU{
 private:
-
     unordered_map<char, string> X4B = {
             {'0', "0000"}, {'1', "0001"}, {'2', "0010"}, {'3', "0011"},
             {'4', "0100"}, {'5', "0101"}, {'6', "0110"}, {'7', "0111"},
@@ -73,6 +72,7 @@ public:
     void add(string idx1, string idx2, Register &register1, string address);
     void addF(string idx1, string idx2, Register &register1, string address);
     void andOperator(const string &register_position1, const string &register_position2, const string &register_store_position, Register &register1);
+
 };
 
 class CU{
@@ -89,6 +89,8 @@ public :
     void jump(string idxReg, string RX, Register &register1, int &pc);
     void jump2(string idxReg, string RX, Register &register1, int &pc);
     void rotate(const string &register_position,const string& num_of_steps, Register &register1);
+    void jump1(string idxReg, string RX, Register &register1, int &pc);
+    void jump2(string idxReg, string RX, Register &register1, int &pc);   //bonus
     void halt();
 };
 

@@ -499,6 +499,7 @@ void CPU::execute(Register &new_register, Memory &memory, vector<string> &decode
     else if (opcode == "2") { // Opcode 2: Load with immediate value
         cu->load2(reg_pos, operand, new_register);
     }
+
     else if (opcode == "3") {
 
         cu->store(reg_pos, operand, new_register,memory);
@@ -533,6 +534,9 @@ void CPU::execute(Register &new_register, Memory &memory, vector<string> &decode
     }
     else if (opcode == "B") {
         cu->jump(reg_pos, operand, new_register,program_cnt);
+
+    else if (opcode == "B") { // Opcode B: Jump to immediate value
+        cu->jump1(reg_pos, operand, new_register,program_cnt);
     }
     else if (opcode == "D") {
         cu->jump2(reg_pos, operand, new_register,program_cnt);
@@ -571,3 +575,125 @@ void CPU::printRegister(){
 
 
 
+
+void CU::jump1(string idxReg, string RX, Register &register1, int &pc) {
+    if (register1.getCell(idxReg) == register1.getCell("0")){
+        int new_address = hexStringToInt(RX) - pc;
+        pc += new_address;
+    }
+}
+
+void CU::jump2(std::string idxReg, std::string RX, Register &register1, int &pc) {
+    if (register1.getCell(idxReg) > register1.getCell("0")){
+        int new_address = hexStringToInt(RX) - pc;
+        pc += new_address;
+    }
+}
+
+
+void CU::halt() {
+    //i will do it with GUI
+}
+bool ALU::isValid(string statment) {
+    regex valid ("[0-9A-F]{4}");
+    if (regex_match(statment, valid)){
+        return true;
+    }else return false;
+}
+
+string ALU::decimalToHex(string decimal_num){
+    int dec_num = stoi(decimal_num);
+    if (dec_num < 0)
+        dec_num += 256;
+    stringstream ss;
+    ss << hex << uppercase << setw(2) << setfill('0') << dec_num;
+    return ss.str();
+}
+
+
+string ALU::hexToDecimal(string hexa_num) {
+    int decValue = 0;
+    int length = hexa_num.length();
+    decValue = stoi(hexa_num, nullptr, 16);
+    if (hexa_num[0] >= '8')
+        decValue -= pow(2, length * 4);
+
+    return to_string(decValue);
+}
+
+void ALU::add(string idx1, string idx2, Register &register1, string address) {
+    string dec1 = hexToDecimal(idx1), dec2 = hexToDecimal(idx2);
+    int result = stoi(dec1) + stoi(dec2);
+    register1.setCell(address, decimalToHex(to_string(result)));
+}
+double ALU::floatextract(string hexa){
+    stringstream converter;
+    char signchar = hexa[0];
+    int exponent, sign = (signchar >= '8') ? -1 : 1, leftside;
+    double total, rightside = 0.0;
+    converter << hex << signchar;
+    converter >> exponent;
+    exponent -= (signchar >='8') ? 12 : 4;
+    string mantissa = X4B[toupper(hexa[1])], right;
+    if (exponent > 0){
+        leftside = stoi(mantissa.substr(0, exponent), nullptr, 2);
+        right = mantissa.substr(exponent);
+        for (int i = 0; i < right.size(); ++i) {
+            if (right[i] == '1'){
+                rightside += pow(2, -(i + 1));
+            }
+        }
+    }else{
+        string filling(abs(exponent), '0');
+        right = filling + mantissa;
+        for (int i = 0; i < right.size(); ++i) {
+            if (right[i] == '1'){
+                rightside += pow(2, -(i + 1));
+            }
+        }
+    }
+
+    total = sign * (leftside + rightside);
+    return total;
+}
+string  ALU::floattohex(double floating){
+    int left = floating;
+    string sign = (floating >= 0) ? "0" : "1";
+    double right = abs(floating - left);
+    string leftside = X3B[(abs(left))], rightside;
+    for (int i = 0; i < 4; ++i){
+        right *= 2;
+        rightside += (right >= 1) ? "1" : "0";
+        right -= (right >= 1) ? 1: 0;
+    }
+    int exponent = 3, radix = 0;
+    while(exponent > 0){
+        if (leftside[abs(exponent - 3)] == '1'){
+            break;
+        }else{
+            exponent--;
+            radix++;
+        }
+    };
+    int counter = 0;
+    while(exponent <= 0 && counter < 3){
+        if (rightside[counter] == '1'){
+            break;
+        }else{
+            counter++;
+            exponent--;
+            radix++;
+        }
+    };
+    exponent += (floating == 0.0) ? 3 : 4;
+    string expo = X3B[exponent];
+    string both = leftside + rightside, mantissa = both.substr(radix, 4);
+    string Final_bin = sign + expo + mantissa;
+    string Hexa = FourBX[Final_bin.substr(0, 4)] + FourBX[Final_bin.substr(4,4)];
+    return Hexa;
+}
+void ALU::addF(string idx1, string idx2, Register &register1, string address){
+    double sum = floatextract(idx1) + floatextract(idx2);
+    string sum_hex = floattohex(sum);
+    register1.setCell(address, sum_hex);
+}
