@@ -9,6 +9,7 @@ class Register{
 private:
     map<string ,string> register1;
     string getHexadecimalRange(int num);
+    void clearRegister();
 public:
 
     Register();
@@ -24,6 +25,8 @@ class Memory{
 
 private:
     map<string ,string> memory;
+    void clearMemory();
+    int start = 26;
 public:
 
     static string intToHex(int num) ;
@@ -32,6 +35,7 @@ public:
     void setCell(const string &address,const string &value);
     void takeValuesFromFileAndAssignIt(vector<string>& instructions);
     void takeValuesOneByOneAndAssignIt(string &instruction);
+    void setStart(const string &PC);
     void printMemory();
 
 };
@@ -108,7 +112,8 @@ public:
     CPU();
     ~CPU();
     void runNextStep(Memory& memory);
-    void setpc(const string &address);
+    void runTillHalt(Memory& memory);
+    void setPC(const string &address);
     string getPC();
     void printRegister();
 
@@ -128,11 +133,13 @@ public:
     ~Machine();
     bool verifyInputs();
     void loadProgramFile(const string& file_path);
-    void loadProgramNormalWay(const string& instruction);
+    void loadProgramNormalWay(string& instruction);
     void setPC(const string &address);
     void sendInstructionsToMemory();
     void sendInstructionsToCPU();
     void outPutState();
+    void runTillHalt(Memory &memory);
+    void runProgram();
 };
 
 

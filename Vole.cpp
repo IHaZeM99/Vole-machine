@@ -37,9 +37,13 @@ void Machine::loadProgramFile(const string& file_path) {
 
 }
 
-void Machine::loadProgramNormalWay(const std::string &instruction) {
+void Machine::loadProgramNormalWay(string &instruction) {
 
-    instructions.push_back(instruction);
+    memory->takeValuesOneByOneAndAssignIt(instruction);
+}
+
+void Machine::runTillHalt(Memory &memory) {
+    cpu->runTillHalt(memory);
 }
 
 void Machine::outPutState() {
@@ -59,11 +63,13 @@ void Machine::sendInstructionsToMemory() {
 void Machine::sendInstructionsToCPU() {
 
     cpu->runNextStep(*memory);
+    cpu->runTillHalt(*memory);
 }
 
 void Machine::setPC(const std::string &address) {
 
-        cpu->setpc(address);
+        cpu->setPC(address);
+        memory->setStart(address);
 }
 
 //##################################################//
@@ -80,10 +86,12 @@ string Memory::getCell(const string& address) {
     return memory[address];
 }
 
+
+
+
 void Memory::takeValuesFromFileAndAssignIt(vector<string> &instructions) {
 
     string address1,address2, value1, value2;
-    int start = 0;
     for (size_t i = 0; i < instructions.size(); ++i) {
         address1 = intToHex(start);
         start++;
@@ -102,7 +110,6 @@ void Memory::takeValuesOneByOneAndAssignIt(std::string &instruction) {
 
 
     string address1,address2, value1, value2;
-    int start = 0;
     address1 = intToHex(start);
     start++;
     address2 = intToHex(start);
@@ -123,13 +130,38 @@ string Memory::intToHex(int num) {
 
 }
 
+void Machine::runProgram() {
+    int choice;
+    cout << "Select mode:\n";
+    cout << "1. Run Next Instruction\n";
+    cout << "2. Run Until Halt\n";
+    cout << "Enter your choice: ";
+    cin >> choice;
 
-Memory::Memory() {
+    switch (choice) {
+        case 1:
+            cpu->runNextStep(*memory);
+            break;
+        case 2:
+            cpu->runTillHalt(*memory);
+            break;
+        default:
+            cout << "Invalid choice. Please enter 1 or 2." << endl;
+    }
+
+}
+
+void Memory::clearMemory() {
 
     for (int i = 0; i <= 255; i++) {
         string hexAddress = intToHex(i);
         memory[hexAddress] = "00";
     }
+}
+
+Memory::Memory() {
+
+    clearMemory();
 }
 
 void Memory::printMemory(){
@@ -138,6 +170,11 @@ void Memory::printMemory(){
     for (auto &item: memory) {
         cout << item.first << "          " << item.second << '\n';
     }
+}
+
+void Memory::setStart(const std::string &PC) {
+
+        start = stoi(PC, nullptr, 16);
 }
 
 //####################################################//
@@ -153,12 +190,19 @@ string Register::getHexadecimalRange(int num) {
     return ss.str();
 }
 
-Register::Register() {
+
+void Register::clearRegister() {
 
     for (int i = 0; i <= 15; i++) {
         string hexAddress = getHexadecimalRange(i);
         register1[hexAddress] = "00";
     }
+
+}
+
+Register::Register() {
+
+   clearRegister();
 }
 
 void Register::setCell(const string &address,const  string &value) {
@@ -498,16 +542,21 @@ void CPU::execute(Register &new_register, Memory &memory, vector<string> &decode
 
 
 void CPU::runNextStep(Memory &memory) {
-    while (true) {
-        string instruction = fetch(memory);           // Fetch next instruction
-        if (instruction.empty() || instruction[0] == '0') break; // Halt on empty or specific opcode
+    if (instruction_register != "C000") {  // Assuming "HALT" is the halt condition
+        string instruction = fetch(memory);
+        vector<string> decoded = decode(instruction);
+        execute(*register1, memory, decoded);
+    }
 
-        vector<string> decoded = decode(instruction); // Decode instruction
-        execute(*register1, memory, decoded);         // Execute based on decoded data
+}
+
+void CPU::runTillHalt(Memory &memory) {
+    while (instruction_register != "C000") {
+        runNextStep(memory);
     }
 }
 
-void CPU::setpc(const string &address) {
+void CPU::setPC(const string &address) {
     program_cnt = stoi(address, nullptr, 16);
 }
 
