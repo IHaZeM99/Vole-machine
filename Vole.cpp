@@ -428,7 +428,8 @@ void ALU::addF(string idx1, string idx2, Register &register1, string address){
     double value1 = floatextract(register1.getCell(idx1));
     double value2 = floatextract(register1.getCell(idx2));
     double sum = value1 + value2;
-
+    if (sum < -7.5) sum = -7.5;
+    if (sum > 7.5) sum = 7.5;
     string sum_hex = floattohex(sum);
     register1.setCell(address, sum_hex);
 }
