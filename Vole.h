@@ -64,6 +64,8 @@ private:
     string floattohex(double floating);
     double floatextract(string hexa);
     string hexAnd(const string &hex1, const string &hex2);
+    string XOR(string hexa1, string hexa2);
+    string OR(string hexa1, string hexa2);
 
 public:
 
