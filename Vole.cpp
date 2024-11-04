@@ -353,14 +353,14 @@ void ALU::add(string idx1, string idx2, Register &register1, string address) {
     string dec1 = hexToDecimal(register1.getCell(idx1));
     string dec2 = hexToDecimal(register1.getCell(idx2));
     int result = stoi(dec1) + stoi(dec2);
-    result &= 0xFF; // Ensure result is within 8-bit limit
+    result &= 0xFF;
     string resultHex = decimalToHex(to_string(result));
     register1.setCell(address, resultHex);
 }
 double ALU::floatextract(string hexa){
     stringstream converter;
     char signchar = hexa[0];
-    int exponent, sign = (signchar >= '8') ? -1 : 1, leftside;
+    int exponent, sign = (signchar >= '8') ? -1 : 1, leftside = 0;
     double total, rightside = 0.0;
     converter << hex << signchar;
     converter >> exponent;
@@ -429,7 +429,6 @@ void ALU::addF(string idx1, string idx2, Register &register1, string address){
     double value2 = floatextract(register1.getCell(idx2));
     double sum = value1 + value2;
 
-    // Convert result to hex and set register
     string sum_hex = floattohex(sum);
     register1.setCell(address, sum_hex);
 }
