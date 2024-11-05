@@ -392,7 +392,7 @@ string  ALU::floattohex(double floating){
     string sign = (floating >= 0) ? "0" : "1";
     double right = abs(floating - left);
     string leftside = X3B[(abs(left))], rightside;
-    for (int i = 0; i < 4; ++i){
+    for (int i = 0; i < 7; ++i){
         right *= 2;
         rightside += (right >= 1) ? "1" : "0";
         right -= (right >= 1) ? 1: 0;
@@ -419,6 +419,7 @@ string  ALU::floattohex(double floating){
     exponent += (floating == 0.0) ? 3 : 4;
     string expo = X3B[exponent];
     string both = leftside + rightside, mantissa = both.substr(radix, 4);
+    mantissa += (mantissa.length() < 4) ? string(4 - mantissa.length(), '0') : "";
     string Final_bin = sign + expo + mantissa;
     string Hexa = FourBX[Final_bin.substr(0, 4)] + FourBX[Final_bin.substr(4,4)];
     return Hexa;
