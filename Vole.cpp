@@ -469,7 +469,7 @@ void CU::halt() {
 //###############################################//
 
 bool ALU::isValid(string statment) {
-    regex valid ("[0-9A-F]{4}");
+    regex valid ("[1-9A-C][0-9A-F]{3}");
     if (regex_match(statment, valid)){
         return true;
     }else return false;
