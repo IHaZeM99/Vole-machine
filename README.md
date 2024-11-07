@@ -60,13 +60,3 @@ Welcome to the **Vole Machine Simulator**! This project provides a graphical int
 3. **Execute Program**: Choose **Run** for continuous execution or **Run One Cycle** for step-by-step control.
 4. **Check Results**: The **Output Screen** displays program output, showing values in multiple formats (ASCII, hex, integer, float) for easy interpretation.
 
----
-
-### 📖 Example Code Block for GitHub
-
-```cpp
-// Example instruction format for input
-LOAD R1, 0x0A   // Load value at memory address 0x0A into Register 1
-ADD R2, R1      // Add value in Register 1 to Register 2
-STORE R2, 0x0B  // Store result in memory address 0x0B
-HALT            // End program execution
