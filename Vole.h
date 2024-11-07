@@ -2,20 +2,30 @@
 #define A1_T4_VOLE_H
 
 #include <bits/stdc++.h>
+#include <QMessageBox>
+#include <QCoreApplication>
+#include "ui_mainwindow.h"
+#include <QDebug>
+
+
+
 using namespace std;
+
+
 
 class Register{
 
 private:
     map<string ,string> register1;
-    string getHexadecimalRange(int num);
-    void clearRegister();
-public:
 
+public:
+    string getHexadecimalRange(int num);
     Register();
     string getCell(const string &address);
     void setCell(const string &address,const  string &value);
     void printRegister();
+    string hexatoBinary(const string &hexa);
+    void clearRegister();
 };
 
 
@@ -25,18 +35,20 @@ class Memory{
 
 private:
     map<string ,string> memory;
-    void clearMemory();
-    int start = 26;
+    int start = 10;
 public:
 
     static string intToHex(int num) ;
     Memory();
     string getCell(const string &address);
     void setCell(const string &address,const string &value);
-    void takeValuesFromFileAndAssignIt(vector<string>& instructions);
+    void takeValuesFromFileAndAssignIt(vector<string>& instructions,string pc);
     void takeValuesOneByOneAndAssignIt(string &instruction);
-    void setStart(const string &PC);
+    void setStart(string PC);
     void printMemory();
+    string hexatoBinary(const string &hexa);
+    void clearMemory();
+
 
 };
 
@@ -46,26 +58,24 @@ class ALU{
 private:
 
     unordered_map<char, string> X4B = {
-            {'0', "0000"}, {'1', "0001"}, {'2', "0010"}, {'3', "0011"},
-            {'4', "0100"}, {'5', "0101"}, {'6', "0110"}, {'7', "0111"},
-            {'8', "1000"}, {'9', "1001"}, {'A', "1010"}, {'B', "1011"},
-            {'C', "1100"}, {'D', "1101"}, {'E', "1110"}, {'F', "1111"}
+        {'0', "0000"}, {'1', "0001"}, {'2', "0010"}, {'3', "0011"},
+        {'4', "0100"}, {'5', "0101"}, {'6', "0110"}, {'7', "0111"},
+        {'8', "1000"}, {'9', "1001"}, {'A', "1010"}, {'B', "1011"},
+        {'C', "1100"}, {'D', "1101"}, {'E', "1110"}, {'F', "1111"}
     };
     unordered_map<string, string> FourBX = {
-            {"0000", "0"}, {"0001", "1"}, {"0010", "2"}, {"0011", "3"},
-            {"0100", "4"}, {"0101", "5"}, {"0110", "6"}, {"0111", "7"},
-            {"1000", "8"}, {"1001", "9"}, {"1010", "A"}, {"1011", "B"},
-            {"1100", "C"}, {"1101", "D"}, {"1110", "E"}, {"1111", "F"}
+        {"0000", "0"}, {"0001", "1"}, {"0010", "2"}, {"0011", "3"},
+        {"0100", "4"}, {"0101", "5"}, {"0110", "6"}, {"0111", "7"},
+        {"1000", "8"}, {"1001", "9"}, {"1010", "A"}, {"1011", "B"},
+        {"1100", "C"}, {"1101", "D"}, {"1110", "E"}, {"1111", "F"}
     };
     unordered_map<int, string> X3B = {
-            {0, "000"}, {1, "001"}, {2, "010"}, {3, "011"},
-            {4, "100"}, {5, "101"}, {6, "110"}, {7, "111"},
-    };
+        {0, "000"}, {1, "001"}, {2, "010"}, {3, "011"},
+        {4, "100"}, {5, "101"}, {6, "110"}, {7, "111"},
+        };
     string floattohex(double floating);
-    double floatextract(string hexa);
+
     string hexAnd(const string &hex1, const string &hex2);
-    string XOR(string hexa1, string hexa2);
-    string OR(string hexa1, string hexa2);
 
 public:
 
@@ -75,6 +85,9 @@ public:
     void add(string idx1, string idx2, Register &register1, string address);
     void addF(string idx1, string idx2, Register &register1, string address);
     void andOperator(const string &register_position1, const string &register_position2, const string &register_store_position, Register &register1);
+    string XOR(string hexa1, string hexa2);
+    string OR(string hexa1, string hexa2);
+    double floatextract(string hexa);
 };
 
 class CU{
@@ -98,6 +111,7 @@ class CPU{
 
 private:
 
+    bool END;
     int program_cnt;
     string instruction_register;
     Register* register1;
@@ -107,21 +121,28 @@ private:
     string fetch(Memory& memory);
     vector<string> decode(string& instruction);
     void execute(Register& new_register, Memory& memory, vector<string>& decoded);
-    int hexStringToInt(const std::string& hexStr);
+
+
 
 public:
 
     CPU();
     ~CPU();
     void runNextStep(Memory& memory);
-    void runTillHalt(Memory& memory);
+    void runTillHalt(Memory& memory,Ui::MainWindow* ui);
     void setPC(const string &address);
+    bool getend();
+    void setend();
     string getPC();
     void printRegister();
     Register* getreg();
     CU* getcu();
     ALU* getAlu();
-
+    bool verifyInputs(const string& instruction);
+    int hexStringToInt(string hexStr);
+    void display_screen(Ui::MainWindow* ui);
+    void clear_screen();
+    void fetch_from_user(string fetch);
 };
 
 class Machine{
@@ -131,22 +152,26 @@ private:
     CPU* cpu{};
     Memory* memory{};
     vector<string> instructions;
+    //Ui::MainWindow* ui;
+    string starting_address;
 
 public:
 
     Machine();
     ~Machine();
-    bool verifyInputs();
+    bool verifyInputs(const string& instruction);
     void loadProgramFile(const string& file_path);
     void loadProgramNormalWay(string& instruction);
-    void setPC(const string &address);
+    void setPC(string address);
     void sendInstructionsToMemory();
     void sendInstructionsToCPU();
     void outPutState();
-    void runTillHalt(Memory &memory);
-    void runProgram();
     CPU* getcpu();
     Memory* getmem();
+    void runTillHalt(Ui::MainWindow* ui);
+    void runNextStep();
+    void clearInstructions();
+    void resetExecutionState();
 };
 
 

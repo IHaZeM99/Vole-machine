@@ -1,6 +1,8 @@
 
 #include "Vole.h"
 
+std::vector<std::string> SCR_Vect ;
+std::string LASTHEX = "";
 //###################################################//
 //################### Machine #######################//
 //###################################################//
@@ -10,6 +12,7 @@ Machine::Machine() {
 
     cpu = new CPU();
     memory = new Memory();
+    //Ui::MainWindow* ui = new Ui::MainWindow ui;
 
 }
 
@@ -24,13 +27,28 @@ void Machine::loadProgramFile(const string& file_path) {
 
     if (!file) {
         wcerr << "Error: Unable to open the file for reading: " << file_path.c_str() << endl;
+        return;
     }
 
     string line;
+    while (getline(file, line)) {
+        istringstream stream(line);
+        string instruction;
+        bool valid_line = true;
+        size_t initial_size = instructions.size();
 
-    while (file >> line) {
+        while (stream >> instruction) {
+            if (verifyInputs(instruction)) {
+                instructions.push_back(instruction);
+            } else {
+                valid_line = false;
+                break;
+            }
+        }
 
-        instructions.push_back(line);
+        if (!valid_line) {
+            instructions.erase(instructions.begin() + initial_size, instructions.end());
+        }
     }
 
     file.close();
@@ -40,10 +58,6 @@ void Machine::loadProgramFile(const string& file_path) {
 void Machine::loadProgramNormalWay(string &instruction) {
 
     memory->takeValuesOneByOneAndAssignIt(instruction);
-}
-
-void Machine::runTillHalt(Memory &memory) {
-    cpu->runTillHalt(memory);
 }
 
 void Machine::outPutState() {
@@ -57,19 +71,24 @@ void Machine::outPutState() {
 }
 
 void Machine::sendInstructionsToMemory() {
-    memory->takeValuesFromFileAndAssignIt(instructions);
+    memory->takeValuesFromFileAndAssignIt(instructions,starting_address);
 }
 
-void Machine::sendInstructionsToCPU() {
+// void Machine::sendInstructionsToCPU() {
 
-    cpu->runNextStep(*memory);
-    cpu->runTillHalt(*memory);
+//     cpu->runNextStep(*memory);
+//     cpu->runTillHalt(*memory);
+// }
+
+void Machine::setPC( std::string address = "0A") {
+
+    cpu->setPC(address);
+    memory->setStart(address);
+    starting_address = address;
 }
 
-void Machine::setPC(const std::string &address) {
-
-        cpu->setPC(address);
-        memory->setStart(address);
+bool Machine::verifyInputs(const string& instructon){
+    return cpu->verifyInputs(instructon);
 }
 
 CPU* Machine::getcpu() {
@@ -79,6 +98,27 @@ CPU* Machine::getcpu() {
 Memory* Machine::getmem() {
     return memory;
 }
+
+
+void Machine::runTillHalt(Ui::MainWindow* ui) {
+    cpu->runTillHalt(*memory,ui);
+}
+
+void Machine::runNextStep() {
+    cpu->runNextStep(*memory);
+}
+
+void Machine::clearInstructions() {
+    instructions.clear();
+}
+
+void Machine::resetExecutionState() {
+
+    cpu->setPC("0A");
+    cpu->setend();
+}
+
+
 
 //##################################################//
 //################### Memory #######################//
@@ -97,9 +137,13 @@ string Memory::getCell(const string& address) {
 
 
 
-void Memory::takeValuesFromFileAndAssignIt(vector<string> &instructions) {
+void Memory::takeValuesFromFileAndAssignIt(vector<string> &instructions,string pc) {
 
     string address1,address2, value1, value2;
+    setStart(pc);
+    if(pc == ""){
+        pc = "0A";
+    }
     for (size_t i = 0; i < instructions.size(); ++i) {
         address1 = intToHex(start);
         start++;
@@ -138,27 +182,6 @@ string Memory::intToHex(int num) {
 
 }
 
-void Machine::runProgram() {
-    int choice;
-    cout << "Select mode:\n";
-    cout << "1. Run Next Instruction\n";
-    cout << "2. Run Until Halt\n";
-    cout << "Enter your choice: ";
-    cin >> choice;
-
-    switch (choice) {
-        case 1:
-            cpu->runNextStep(*memory);
-            break;
-        case 2:
-            cpu->runTillHalt(*memory);
-            break;
-        default:
-            cout << "Invalid choice. Please enter 1 or 2." << endl;
-    }
-
-}
-
 
 void Memory::clearMemory() {
 
@@ -166,10 +189,11 @@ void Memory::clearMemory() {
         string hexAddress = intToHex(i);
         memory[hexAddress] = "00";
     }
+
 }
 
 Memory::Memory() {
-
+    start = 10;
     clearMemory();
 }
 
@@ -181,9 +205,70 @@ void Memory::printMemory(){
     }
 }
 
-void Memory::setStart(const std::string &PC) {
+void Memory::setStart( std::string PC = "0A") {
 
-        start = stoi(PC, nullptr, 16);
+    start = stoi(PC, nullptr, 16);
+}
+
+string Memory::hexatoBinary(const string &hexa) {
+    string binary;
+    for (char i : hexa) {
+        switch (i) {
+        case '0':
+            binary += "0000";
+            break;
+        case '1':
+            binary += "0001";
+            break;
+        case '2':
+            binary += "0010";
+            break;
+        case '3':
+            binary += "0011";
+            break;
+        case '4':
+            binary += "0100";
+            break;
+        case '5':
+            binary += "0101";
+            break;
+        case '6':
+            binary += "0110";
+            break;
+        case '7':
+            binary += "0111";
+            break;
+        case '8':
+            binary += "1000";
+            break;
+        case '9':
+            binary += "1001";
+            break;
+        case 'A':
+            binary += "1010";
+            break;
+        case 'B':
+            binary += "1011";
+            break;
+        case 'C':
+            binary += "1100";
+            break;
+        case 'D':
+            binary += "1101";
+            break;
+        case 'E':
+            binary += "1110";
+            break;
+        case 'F':
+            binary += "1111";
+            break;
+        default:
+            cout << "Invalid hexadecimal digit " << i << endl;
+        }
+    }
+    return binary;
+
+
 }
 
 //####################################################//
@@ -211,7 +296,7 @@ void Register::clearRegister() {
 
 Register::Register() {
 
-   clearRegister();
+    clearRegister();
 }
 
 void Register::setCell(const string &address,const  string &value) {
@@ -230,6 +315,67 @@ void Register::printRegister(){
     for (auto &item: register1) {
         cout << item.first << "          " << item.second << '\n';
     }
+
+}
+
+string Register::hexatoBinary(const string &hexa) {
+    string binary;
+    for (char i : hexa) {
+        switch (i) {
+        case '0':
+            binary += "0000";
+            break;
+        case '1':
+            binary += "0001";
+            break;
+        case '2':
+            binary += "0010";
+            break;
+        case '3':
+            binary += "0011";
+            break;
+        case '4':
+            binary += "0100";
+            break;
+        case '5':
+            binary += "0101";
+            break;
+        case '6':
+            binary += "0110";
+            break;
+        case '7':
+            binary += "0111";
+            break;
+        case '8':
+            binary += "1000";
+            break;
+        case '9':
+            binary += "1001";
+            break;
+        case 'A':
+            binary += "1010";
+            break;
+        case 'B':
+            binary += "1011";
+            break;
+        case 'C':
+            binary += "1100";
+            break;
+        case 'D':
+            binary += "1101";
+            break;
+        case 'E':
+            binary += "1110";
+            break;
+        case 'F':
+            binary += "1111";
+            break;
+        default:
+            cout << "Invalid hexadecimal digit " << i << endl;
+        }
+    }
+    return binary;
+
 
 }
 
@@ -265,7 +411,7 @@ void CU::store(string idxReg, string strMem, Register &register1, Memory &memory
     string reg_data = register1.getCell(idxReg);
     memory.setCell(strMem,reg_data);
     if (strMem == "00"){                                                            // if store on that form R00"print to screen"
-        cout << reg_data << endl;
+
     }
 }
 
@@ -353,7 +499,7 @@ void ALU::add(string idx1, string idx2, Register &register1, string address) {
     string dec1 = hexToDecimal(register1.getCell(idx1));
     string dec2 = hexToDecimal(register1.getCell(idx2));
     int result = stoi(dec1) + stoi(dec2);
-    result &= 0xFF;
+    result &= 0xFF; // Ensure result is within 8-bit limit
     string resultHex = decimalToHex(to_string(result));
     register1.setCell(address, resultHex);
 }
@@ -436,7 +582,6 @@ void ALU::addF(string idx1, string idx2, Register &register1, string address){
 }
 
 
-
 string ALU::hexAnd(const string &hex1, const string &hex2) {
 
     // Convert hex strings to integers
@@ -461,133 +606,6 @@ void ALU::andOperator(const string &register_position1, const string &register_p
 
 }
 
-
-//###############################################//
-//################### CPU #######################//
-//###############################################//
-
-CPU::CPU():program_cnt(0){
-
-    register1 = new Register();
-    cu = new CU();
-    alu = new ALU();
-}
-CPU::~CPU(){
-
-    delete register1;
-    delete cu;
-    delete alu;
-}
-
-string CPU::fetch(Memory& memory) {
-    instruction_register = "";
-    string part1_memory = Memory::intToHex(program_cnt++);
-    string part2_memory = Memory::intToHex(program_cnt++);
-    instruction_register += memory.getCell(part1_memory);
-    instruction_register += memory.getCell(part2_memory);
-    return instruction_register;
-}
-
-
-vector<string> CPU::decode(string& instruction) {
-    vector<string> decoded;
-    decoded.push_back(string(1, instruction[0]));         // Opcode as string
-    decoded.push_back(string(1, instruction[1]));         // Register position as string
-    decoded.push_back(instruction.substr(2, 2));          // Operand as string
-    return decoded;
-}
-
-
-void CPU::execute(Register &new_register, Memory &memory, vector<string> &decoded) {
-    string opcode = decoded[0];
-    string reg_pos = decoded[1];
-    string operand = decoded[2];
-
-    if (opcode == "1") {        // Opcode 1: Load from memory
-        cu->load1(reg_pos, operand, new_register, memory);
-    }
-    else if (opcode == "2") { // Opcode 2: Load with immediate value
-        cu->load2(reg_pos, operand, new_register);
-    }
-    else if (opcode == "3") {
-
-        cu->store(reg_pos, operand, new_register,memory);
-    }
-    else if (opcode == "4") {
-        string register_pos1, register_pos2 ;
-        register_pos1 += operand.front();
-        register_pos2 += operand.back();
-        cu->move(register_pos1, register_pos2, new_register);
-    }
-    else if (opcode == "5") {
-        string register_pos1, register_pos2 ;
-        register_pos1 += operand.front();
-        register_pos2 += operand.back();
-        alu->add(register_pos1, register_pos2, new_register, reg_pos);
-    }
-  /*  else if (opcode == "6") {
-        string register_pos1, register_pos2 ;
-        register_pos1 += operand.front();
-        register_pos2 += operand.back();
-
-        alu->addF(register_pos1, register_pos2, new_register, reg_pos);
-    }*/
-    else if (opcode == "8") {
-        string register_pos1, register_pos2 ;
-        register_pos1 += operand.front();
-        register_pos2 += operand.back();
-        alu->andOperator(register_pos1, register_pos2, reg_pos, new_register);
-    }
-    else if (opcode == "A") {
-        cu->rotate(reg_pos,operand,new_register);
-    }
-    else if (opcode == "B") {
-        cu->jump(reg_pos, operand, new_register,program_cnt);
-    }
-    else if (opcode == "D") {
-        cu->jump2(reg_pos, operand, new_register,program_cnt);
-    }
-
-}
-
-
-void CPU::runNextStep(Memory &memory) {
-    if (instruction_register != "C000") {  // Assuming "HALT" is the halt condition
-        string instruction = fetch(memory);
-        vector<string> decoded = decode(instruction);
-        execute(*register1, memory, decoded);
-    }
-
-}
-
-void CPU::runTillHalt(Memory &memory) {
-    while (instruction_register != "C000") {
-        runNextStep(memory);
-    }
-}
-
-void CPU::setPC(const string &address) {
-    program_cnt = stoi(address, nullptr, 16);
-}
-
-string CPU::getPC() {
-    return Memory::intToHex(program_cnt);
-}
-
-Register* CPU::getreg(){
-    return register1;
-}
-CU* CPU::getcu(){
-    return cu;
-}
-ALU* CPU::getAlu(){
-    return alu;
-}
-
-void CPU::printRegister(){
-
-    register1->printRegister();
-}
 string ALU::OR(string hexa1, string hexa2){
     string bin1 = X4B[hexa1[0]] + X4B[hexa1[1]];
     string bin2 = X4B[hexa2[0]] + X4B[hexa2[1]];
@@ -620,5 +638,232 @@ string ALU::XOR(string hexa1, string hexa2){
     string fin_hex = FourBX[final_bin.substr(0, 4)] + FourBX[final_bin.substr(3, 4)];
     return fin_hex;
 }
+
+
+//###############################################//
+//################### CPU #######################//
+//###############################################//
+
+CPU::CPU():program_cnt(10),END(false){
+
+    register1 = new Register();
+    cu = new CU();
+    alu = new ALU();
+}
+
+CPU::~CPU(){
+
+    delete register1;
+    delete cu;
+    delete alu;
+}
+
+bool CPU::verifyInputs(const string& instructon){
+    return alu->isValid(instructon);
+}
+
+string CPU::fetch(Memory& memory) {
+    instruction_register = "";
+    string part1_memory = Memory::intToHex(program_cnt++);
+    string part2_memory = Memory::intToHex(program_cnt++);
+    instruction_register += memory.getCell(part1_memory);
+    instruction_register += memory.getCell(part2_memory);
+    return instruction_register;
+}
+
+
+vector<string> CPU::decode(string& instruction) {
+    vector<string> decoded;
+    decoded.push_back(string(1, instruction[0]));         // Opcode as string
+    decoded.push_back(string(1, instruction[1]));         // Register position as string
+    decoded.push_back(instruction.substr(2, 2));          // Operand as string
+    return decoded;
+}
+
+
+void CPU::execute(Register &new_register, Memory &memory, vector<string> &decoded) {
+    string opcode = decoded[0];
+    string reg_pos = decoded[1];
+    string operand = decoded[2];
+
+    if (opcode == "1") {        // Opcode 1: Load from memory
+        cu->load1(reg_pos, operand, new_register, memory);
+    }
+    else if (opcode == "2") { // Opcode 2: Load with immediate value
+        cu->load2(reg_pos, operand, new_register);
+    }
+    else if (opcode == "3") { // Opcode 3: store
+
+        cu->store(reg_pos, operand, new_register,memory);
+    }
+    else if (opcode == "4") {
+        string register_pos1, register_pos2 ;
+        register_pos1 += operand.front();
+        register_pos2 += operand.back();
+        cu->move(register_pos1, register_pos2, new_register);
+    }
+    else if (opcode == "5") {
+        string register_pos1, register_pos2 ;
+        register_pos1 += operand.front();
+        register_pos2 += operand.back();
+        alu->add(register_pos1, register_pos2, new_register, reg_pos);
+    }
+    else if (opcode == "6") {
+        string register_pos1, register_pos2 ;
+        register_pos1 += operand.front();
+        register_pos2 += operand.back();
+
+        alu->addF(register_pos1, register_pos2, new_register, reg_pos);
+    }
+    else if (opcode == "7") {
+        string register_pos1, register_pos2 ;
+        register_pos1 += operand.front();
+        register_pos2 += operand.back();
+
+        string value1 = new_register.getCell(register_pos1);
+        string value2 = new_register.getCell(register_pos2);
+        string answer = alu->OR(value1,value2);
+        new_register.setCell(reg_pos,answer);
+    }
+    else if (opcode == "8") {
+        string register_pos1, register_pos2 ;
+        register_pos1 += operand.front();
+        register_pos2 += operand.back();
+        alu->andOperator(register_pos1, register_pos2, reg_pos, new_register);
+    }
+    else if (opcode == "9") {
+        string register_pos1, register_pos2 ;
+        register_pos1 += operand.front();
+        register_pos2 += operand.back();
+
+        string value1 = new_register.getCell(register_pos1);
+        string value2 = new_register.getCell(register_pos2);
+        string answer = alu->XOR(value1,value2);
+        new_register.setCell(reg_pos,answer);
+    }
+
+    else if (opcode == "A") {
+        cu->rotate(reg_pos,operand,new_register);
+    }
+    else if (opcode == "B") {
+        cu->jump(reg_pos, operand, new_register,program_cnt);
+    }
+    else if (opcode == "D") {
+        cu->jump2(reg_pos, operand, new_register,program_cnt);
+    }
+
+}
+
+
+void CPU::runNextStep(Memory &memory) {
+    string instruction = fetch(memory);
+    if (instruction_register != "C000" && !END) {  // Assuming "HALT" is the halt condition
+
+        vector<string> decoded = decode(instruction);
+        execute(*register1, memory, decoded);
+
+        SCR_Vect.push_back(memory.getCell("00"));
+    }else{
+        END = true;
+    }
+
+}
+
+void CPU::runTillHalt(Memory &memory,Ui::MainWindow* ui) {
+    // //string instruction = fetch(memory);
+    // while (instruction_register != "C000") {
+    //     runNextStep(memory);
+    // }
+    END = false;
+    instruction_register = memory.getCell(Memory::intToHex(program_cnt));  // Set to starting address if needed
+
+    // Run instructions until HALT
+    while (instruction_register != "C000") {
+        runNextStep(memory);
+
+        QCoreApplication::processEvents();
+    }
+    display_screen(ui);
+
+
+    END = true;  // Set END after HALT is reached
+}
+
+void CPU::setPC(const string &address) {
+    program_cnt = stoi(address, nullptr, 16);
+}
+
+bool CPU::getend(){
+    return END;
+}
+
+void CPU::setend(){
+    END = false;
+}
+
+string CPU::getPC() {
+    return Memory::intToHex(program_cnt);
+}
+
+Register* CPU::getreg(){
+    return register1;
+}
+CU* CPU::getcu(){
+    return cu;
+}
+ALU* CPU::getAlu(){
+    return alu;
+}
+
+void CPU::printRegister(){
+
+    register1->printRegister();
+}
+
+int CPU::hexStringToInt(string hexStr){
+    // Convert hex string to integer
+    int result = 0;
+    for (char c : hexStr) {
+        result *= 16; // Shift left in base 16
+        if (c >= '0' && c <= '9') {
+            result += c - '0'; // Convert character to corresponding integer value
+        } else if (c >= 'A' && c <= 'F') {
+            result += c - 'A' + 10; // Convert character to corresponding integer value
+        }
+    }
+    if (result >= 128) { // If the value is greater than or equal to 128
+        result -= 256; // Convert to negative value
+    }
+
+    return result;
+}
+
+
+void CPU::display_screen(Ui::MainWindow *ui){
+    string print = "";
+    for (string& hex : SCR_Vect){
+        if(hex == "00" || hex == LASTHEX){
+            continue ;
+        }
+        LASTHEX = hex;
+        string ascii = "";
+        for (size_t i = 0; i < hex.length(); i += 2) {
+            string part = hex.substr(i, 2);
+            char ch = stoul(part, nullptr, 16);
+            ascii += ch;
+        }
+        print += "ascii = "+ascii + ", hex = " + hex + "\n";
+
+        qDebug() << "Memory content at address '00': " << QString::fromStdString(hex); // Debugging line
+    }
+    ui->textEdit->setText(QString::fromStdString(print));
+}
+
+void CPU::clear_screen(){
+    SCR_Vect.clear();
+    LASTHEX = "";
+}
+
+
 
 
